@@ -1,0 +1,22 @@
+name: amenity_reservation_app
+description: A Flutter app to reserve amenities.
+
+environment:
+  sdk: ">=3.5.3 <3.6.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  # Add other dependencies here, such as Firebase, etc.
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    # Add local image assets if needed
+    - assets/images/
