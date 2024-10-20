@@ -1,5 +1,6 @@
 name: amenity_reservation_app
 description: A Flutter app to reserve amenities.
+version: 1.0.0
 
 environment:
   sdk: ">=3.5.3 <4.0.0"
