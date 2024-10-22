@@ -1,16 +1,30 @@
 # amenity_reservation_app
 
-A new Flutter project.
+LYF Funan Kitchen Reservation App
 
-## Getting Started
+Tech Stack:
+- Database: Supabase
+- Frontend: Flutter
 
-This project is a starting point for a Flutter application.
+Purpose:
 
-A few resources to get you started if this is your first Flutter project:
+The LYF Funan Kitchen Reservation App allows users to seamlessly reserve kitchen slots at LYF Funan. Users can view available slots, make reservations, and cancel them if necessary. Additionally, users can enhance their cooking experience by purchasing meal kits from local restaurants directly through the app.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Key Features:
+Slot Reservations:
+- Users can view and reserve available 30-minute kitchen slots.
+- Users can reserve up to 3 hours of kitchen time per day. 
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Meal Kit Purchases:
+
+- While reserving a slot, users can explore meal kits offered by local restaurants.
+- They can view the recipe and ingredients of each meal kit before purchasing. 
+
+Reservation Management:
+
+- Users can view their current reservations and cancel them if needed.
+- Users can also check their past reservations and the meal kits they’ve previously purchased. 
+
+No Login Required:
+
+- Users can make reservations simply by entering their email address, eliminating the need for account creation.
