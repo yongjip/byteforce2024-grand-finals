@@ -4,6 +4,8 @@ import '../services/supabase_service.dart';
 import 'meal_kits_screen.dart';
 
 class ReservationScreen extends StatefulWidget {
+  final String email;
+  ReservationScreen({required this.email});
   @override
   _ReservationScreenState createState() => _ReservationScreenState();
 }
@@ -11,8 +13,6 @@ class ReservationScreen extends StatefulWidget {
 class _ReservationScreenState extends State<ReservationScreen> {
   DateTime _selectedDate = DateTime.now();
   List<TimeOfDay> _availableSlots = [];
-  String _email = '';
-  final _emailController = TextEditingController();
 
   @override
   void initState() {
@@ -29,12 +29,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
   }
 
   void _reserveSlot(TimeOfDay time) async {
-    if (_email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter your email address')),
-      );
-      return;
-    }
+    String _email = widget.email;
 
     DateTime startTime = DateTime(
       _selectedDate.year,
@@ -66,6 +61,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
   Widget build(BuildContext context) {
     String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
 
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Reserve a Slot'),
@@ -74,12 +70,9 @@ class _ReservationScreenState extends State<ReservationScreen> {
         children: [
           Padding(
             padding: EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Enter your email'),
-              onChanged: (value) {
-                _email = value;
-              },
+            child: Text(
+              'Available Slots for ${widget.email}',
+              style: TextStyle(fontSize: 20),
             ),
           ),
           Text('Available Slots on $formattedDate'),

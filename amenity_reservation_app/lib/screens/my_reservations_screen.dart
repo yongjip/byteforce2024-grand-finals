@@ -4,29 +4,28 @@ import '../services/supabase_service.dart';
 import '../models/reservation_model.dart';
 
 class MyReservationsScreen extends StatefulWidget {
+  final String email;
+  MyReservationsScreen({required this.email});
   @override
   _MyReservationsScreenState createState() => _MyReservationsScreenState();
 }
 
 class _MyReservationsScreenState extends State<MyReservationsScreen> {
-  String _email = '';
-  final _emailController = TextEditingController();
   List<Reservation> _reservations = [];
 
-  void _fetchReservations() async {
-    if (_email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter your email address')),
-      );
-      return;
-    }
+  @override
+  void initState() {
+    super.initState();
+    _fetchReservations();
+  }
 
-    List<Reservation> res =
-    await SupabaseService().getUserReservations(_email);
+  void _fetchReservations() async {
+    List<Reservation> res = await SupabaseService().getUserReservations(widget.email);
     setState(() {
       _reservations = res;
     });
   }
+
 
   void _cancelReservation(String reservationId) async {
     bool success = await SupabaseService().cancelReservation(reservationId);
@@ -52,12 +51,9 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
           children: [
             Padding(
               padding: EdgeInsets.all(16.0),
-              child: TextField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Enter your email'),
-                onChanged: (value) {
-                  _email = value;
-                },
+              child: Text(
+                'Reservations for ${widget.email}',
+                style: TextStyle(fontSize: 20),
               ),
             ),
             ElevatedButton(
