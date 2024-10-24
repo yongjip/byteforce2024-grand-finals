@@ -81,14 +81,18 @@ class _ReservationScreenState extends State<ReservationScreen> {
               itemCount: _slotAvailability.length,
               itemBuilder: (context, index) {
                 TimeOfDay time = _slotAvailability.keys.elementAt(index);
+                bool isAvailable = _slotAvailability[time]!;
                 return ListTile(
                   title: Text('${time.format(context)}'),
-                  trailing: _slotAvailability[time]!
-                      ? ElevatedButton(
-                    child: Text('Reserve'),
-                    onPressed: () => _reserveSlot(time),
+                  trailing: ElevatedButton(
+                    child: Text(isAvailable ? 'Reserve' : 'Occupied'),
+                    onPressed: isAvailable
+                      ? () => _reserveSlot(time)
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      disabledForegroundColor: Colors.grey,
+                    )
                   )
-                      : Text('Occupied'),
                 );
               },
             ),
