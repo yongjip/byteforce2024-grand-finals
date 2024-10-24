@@ -189,7 +189,7 @@ class SupabaseService {
 
   /// Links selected meal kits to a reservation.
   Future<bool> addMealKitsToReservation(
-      String email, DateTime reservationTime, List<MealKit> mealKits) async {
+      String email, DateTime reservationTime, Map<MealKit, int> mealKitsWithQuantities) async {
     try {
       // Get user
       UserModel user = await getOrCreateUser(email);
@@ -210,10 +210,11 @@ class SupabaseService {
       String reservationId = response['id'];
 
       // Link meal kits to reservation using lowercase table name
-      for (MealKit kit in mealKits) {
+      for (MealKit kit in mealKitsWithQuantities.keys) {
         final link = {
           'reservation_id': reservationId,
           'meal_kit_id': kit.id,
+          'quantity': mealKitsWithQuantities[kit],
         };
         await supabase.from('reservationmealkits').insert(link);
       }

@@ -35,7 +35,7 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
     bool success = await SupabaseService().addMealKitsToReservation(
       widget.email,
       widget.reservationTime,
-      selectedKits,
+      _selectedMealKitsWithQuantities,
     );
 
     if (success) {
