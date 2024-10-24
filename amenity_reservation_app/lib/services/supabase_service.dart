@@ -42,20 +42,17 @@ class SupabaseService {
     }
   }
 
-  /// Fetches available kitchen slots for a given date.
-  Future<List<TimeOfDay>> getAvailableSlots(DateTime date) async {
+  Future<Map<TimeOfDay, bool>> getAvailableSlots(DateTime date) async {
     try {
-      // Assuming kitchen operates from 8 AM to 10 PM
-      List<TimeOfDay> allSlots = [];
-      for (int hour = 8; hour < 22; hour++) {
-        allSlots.add(TimeOfDay(hour: hour, minute: 0));
-        allSlots.add(TimeOfDay(hour: hour, minute: 30));
+      Map<TimeOfDay, bool> slotAvailability = {};
+      for (int hour = 0; hour < 24; hour++) {
+        for (int minute = 0; minute < 60; minute += 30) {
+          slotAvailability[TimeOfDay(hour: hour, minute: minute)] = true;
+        }
       }
-
       final startOfDay = DateTime(date.year, date.month, date.day);
       final endOfDay = startOfDay.add(Duration(days: 1));
 
-      // Use lowercase table name 'reservations'
       final response = await supabase
           .from('reservations')
           .select()
@@ -66,18 +63,55 @@ class SupabaseService {
           .map((data) => Reservation.fromMap(data as Map<String, dynamic>))
           .toList();
 
-      // Remove occupied slots
       for (var res in reservations) {
         TimeOfDay time = TimeOfDay.fromDateTime(res.startTime);
-        allSlots.removeWhere((slot) => slot == time);
+        slotAvailability[time] = false;
       }
 
-      return allSlots;
+      return slotAvailability;
+
     } catch (e) {
-      // Handle error
       throw Exception('Failed to get available slots: $e');
     }
+
   }
+
+  // /// Fetches available kitchen slots for a given date.
+  // Future<List<TimeOfDay>> getAvailableSlots(DateTime date) async {
+  //   try {
+  //     // Assuming kitchen operates from 8 AM to 10 PM
+  //     List<TimeOfDay> allSlots = [];
+  //     for (int hour = 8; hour < 22; hour++) {
+  //       allSlots.add(TimeOfDay(hour: hour, minute: 0));
+  //       allSlots.add(TimeOfDay(hour: hour, minute: 30));
+  //     }
+  //
+  //     final startOfDay = DateTime(date.year, date.month, date.day);
+  //     final endOfDay = startOfDay.add(Duration(days: 1));
+  //
+  //     // Use lowercase table name 'reservations'
+  //     final response = await supabase
+  //         .from('reservations')
+  //         .select()
+  //         .gte('start_time', startOfDay.toIso8601String())
+  //         .lt('start_time', endOfDay.toIso8601String());
+  //
+  //     List<Reservation> reservations = (response as List<dynamic>)
+  //         .map((data) => Reservation.fromMap(data as Map<String, dynamic>))
+  //         .toList();
+  //
+  //     // Remove occupied slots
+  //     for (var res in reservations) {
+  //       TimeOfDay time = TimeOfDay.fromDateTime(res.startTime);
+  //       allSlots.removeWhere((slot) => slot == time);
+  //     }
+  //
+  //     return allSlots;
+  //   } catch (e) {
+  //     // Handle error
+  //     throw Exception('Failed to get available slots: $e');
+  //   }
+  // }
 
   /// Reserves a kitchen slot for a user.
   Future<bool> reserveSlot(

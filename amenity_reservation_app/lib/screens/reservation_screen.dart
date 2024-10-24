@@ -12,7 +12,7 @@ class ReservationScreen extends StatefulWidget {
 
 class _ReservationScreenState extends State<ReservationScreen> {
   DateTime _selectedDate = DateTime.now();
-  List<TimeOfDay> _availableSlots = [];
+  Map<TimeOfDay, bool> _slotAvailability = {};
 
   @override
   void initState() {
@@ -21,10 +21,10 @@ class _ReservationScreenState extends State<ReservationScreen> {
   }
 
   void _fetchAvailableSlots() async {
-    List<TimeOfDay> slots =
+    Map<TimeOfDay, bool> slots =
     await SupabaseService().getAvailableSlots(_selectedDate);
     setState(() {
-      _availableSlots = slots;
+      _slotAvailability = slots;
     });
   }
 
@@ -78,15 +78,17 @@ class _ReservationScreenState extends State<ReservationScreen> {
           Text('Available Slots on $formattedDate'),
           Expanded(
             child: ListView.builder(
-              itemCount: _availableSlots.length,
+              itemCount: _slotAvailability.length,
               itemBuilder: (context, index) {
-                TimeOfDay time = _availableSlots[index];
+                TimeOfDay time = _slotAvailability.keys.elementAt(index);
                 return ListTile(
-                  title: Text(time.format(context)),
-                  trailing: ElevatedButton(
+                  title: Text('${time.format(context)}'),
+                  trailing: _slotAvailability[time]!
+                      ? ElevatedButton(
                     child: Text('Reserve'),
                     onPressed: () => _reserveSlot(time),
-                  ),
+                  )
+                      : Text('Occupied'),
                 );
               },
             ),
