@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               ElevatedButton(
-                child: Text('Submit Email'),
+                child: Text('Save Email'),
                 onPressed: () {
                   setState(() {
                     _email = _emailController.text;  // Save the entered email
@@ -89,6 +89,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     _saveEmail(_email);  // Save the email to SharedPreferences
                   });
                 },
+                // button color changes to green when email is entered
+                style: ElevatedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: Colors.green),
+
               ),
             ],
 
