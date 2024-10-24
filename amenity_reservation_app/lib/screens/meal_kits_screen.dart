@@ -14,7 +14,7 @@ class MealKitsScreen extends StatefulWidget {
 
 class _MealKitsScreenState extends State<MealKitsScreen> {
   List<MealKit> _mealKits = [];
-  List<MealKit> _selectedMealKits = [];
+  Map<MealKit, int> _selectedMealKitsWithQuantities = {}; // Map to track selected meal kits and their quantities
 
   @override
   void initState() {
@@ -30,10 +30,12 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
   }
 
   void _confirmReservation() async {
+    List<MealKit> selectedKits = _selectedMealKitsWithQuantities.keys.toList();
+
     bool success = await SupabaseService().addMealKitsToReservation(
       widget.email,
       widget.reservationTime,
-      _selectedMealKits,
+      selectedKits,
     );
 
     if (success) {
@@ -90,18 +92,51 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
                 itemCount: _mealKits.length,
                 itemBuilder: (context, index) {
                   MealKit kit = _mealKits[index];
-                  bool isSelected = _selectedMealKits.contains(kit);
+                  bool isSelected = _selectedMealKitsWithQuantities.containsKey(kit);
+                  int quantity = _selectedMealKitsWithQuantities[kit] ?? 1; // Default to 1 if not selected yet
                   return ListTile(
                     title: Text(kit.name),
-                    subtitle: Text(kit.description),
+                  subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                      Text(kit.description),
+                    Text('Price: \$${kit.price.toStringAsFixed(2)}'), // Show price
+                      if (isSelected)
+                        Row(
+                          children: [
+                            Text('Quantity: '),
+                            SizedBox(width: 10),
+                            DropdownButton<int>(
+                              value: quantity,
+                              items: List.generate(10, (index) => index + 1)
+                                .map((int value) {
+                                  return DropdownMenuItem<int>(
+                                    value: value,
+                                    child: Text(value.toString()),
+                                  );
+                                }).toList(),
+                              onChanged: (newQuantity) {
+                                setState(() {
+                                  if (newQuantity != null) {
+                                    _selectedMealKitsWithQuantities[kit] = newQuantity;
+                                  }
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+
+
                     trailing: Checkbox(
                       value: isSelected,
                       onChanged: (value) {
                         setState(() {
                           if (value == true) {
-                            _selectedMealKits.add(kit);
+                            _selectedMealKitsWithQuantities[kit] = 1;
                           } else {
-                            _selectedMealKits.remove(kit);
+                            _selectedMealKitsWithQuantities.remove(kit);
                           }
                         });
                       },
