@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../models/user_model.dart';
 import '../models/reservation_model.dart';
 import '../models/meal_kit_model.dart';
+import '../models/reservationmealkits_model.dart';
 
 class SupabaseService {
   final supabase = Supabase.instance.client;
@@ -214,6 +215,7 @@ class SupabaseService {
         final link = {
           'reservation_id': reservationId,
           'meal_kit_id': kit.id,
+          'meal_kit_name': kit.name,
           'quantity': mealKitsWithQuantities[kit],
         };
         await supabase.from('reservationmealkits').insert(link);
@@ -223,6 +225,37 @@ class SupabaseService {
     } catch (e) {
       // Handle error
       return false;
+    }
+  }
+
+  /// Retrieves user meal kits for a reservation.
+  Future<List<MealKit>> getReservationMealKits(String reservationId) async {
+    try {
+      // Use lowercase table name 'reservationmealkits'
+      final response = await supabase
+          .from('reservationmealkits')
+          .select()
+          .eq('reservation_id', reservationId);
+
+      List<ReservationMealKits> links = (response as List<dynamic>)
+          .map((data) => ReservationMealKits.fromMap(data as Map<String, dynamic>))
+          .toList();
+
+      List<MealKit> mealKits = [];
+      for (ReservationMealKits link in links) {
+        final kitResponse = await supabase
+            .from('mealkits')
+            .select()
+            .eq('id', link.mealKitId)
+            .single();
+
+        mealKits.add(MealKit.fromMap(kitResponse));
+      }
+
+      return mealKits;
+    } catch (e) {
+      // Handle error
+      return [];
     }
   }
 

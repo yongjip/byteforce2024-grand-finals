@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/supabase_service.dart';
 import '../models/reservation_model.dart';
+import '../models/reservationmealkits_model.dart';
 
 class MyReservationsScreen extends StatefulWidget {
   final String email;
