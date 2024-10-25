@@ -130,6 +130,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
               },
             ),
           ),
+          // Adding padding to the bottom for iPhone's home indicator
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
         ],
       ),
     );
