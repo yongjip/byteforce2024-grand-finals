@@ -70,6 +70,15 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                   DateFormat('yyyy-MM-dd HH:mm').format(res.startTime);
                   return ListTile(
                     title: Text('Reservation at $formattedTime'),
+                    // Display meal kit names ordered and quantity
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: res.orderedMealKits
+                          .map((link) =>
+                          Text('${link.mealKitName} x${link.quantity}'))
+                          .toList(),
+                    ),
+
                     trailing: ElevatedButton(
                       child: Text('Cancel'),
                       onPressed: () => _cancelReservation(res.id),

@@ -229,7 +229,7 @@ class SupabaseService {
   }
 
   /// Retrieves user meal kits for a reservation.
-  Future<List<MealKit>> getReservationMealKits(String reservationId) async {
+  Future<List<ReservationMealKits>> getReservationMealKits(String reservationId) async {
     try {
       // Use lowercase table name 'reservationmealkits'
       final response = await supabase
@@ -241,18 +241,8 @@ class SupabaseService {
           .map((data) => ReservationMealKits.fromMap(data as Map<String, dynamic>))
           .toList();
 
-      List<MealKit> mealKits = [];
-      for (ReservationMealKits link in links) {
-        final kitResponse = await supabase
-            .from('mealkits')
-            .select()
-            .eq('id', link.mealKitId)
-            .single();
 
-        mealKits.add(MealKit.fromMap(kitResponse));
-      }
-
-      return mealKits;
+      return links;
     } catch (e) {
       // Handle error
       return [];
@@ -270,10 +260,15 @@ class SupabaseService {
           .select()
           .eq('user_id', user.id)
           .order('start_time', ascending: false);
-
-      return (response as List<dynamic>)
+      // add ReservationMealKits to each reservation
+      List<Reservation> reservations = (response as List<dynamic>)
           .map((data) => Reservation.fromMap(data as Map<String, dynamic>))
           .toList();
+
+      for (var res in reservations) {
+        res.orderedMealKits = await getReservationMealKits(res.id);
+      }
+      return reservations;
     } catch (e) {
       // Handle exception
       return [];

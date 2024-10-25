@@ -6,7 +6,7 @@ class Reservation {
   final String userId;
   final DateTime startTime;
   final DateTime endTime;
-  List<MealKit> orderedMealKits; // List of ordered meal kits
+  List<ReservationMealKits> orderedMealKits; // List of ordered meal kits
 
   Reservation({
     required this.id,
@@ -22,6 +22,7 @@ class Reservation {
       userId: map['user_id'],
       startTime: DateTime.parse(map['start_time']),
       endTime: DateTime.parse(map['end_time']),
+      // orderedMealKits will be assigned after fetching meal kits separately
       // We'll assign orderedMealKits after fetching meal kits separately
     );
   }
