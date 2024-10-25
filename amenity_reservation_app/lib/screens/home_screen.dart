@@ -35,16 +35,13 @@ class _HomeScreenState extends State<HomeScreen> {
     await prefs.setString('user_email', email);
   }
 
-  void _clearEmail() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('user_email'); // Remove the email from SharedPreferences
-  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('LYF Funan Kitchen'),
+        title: Text('LYF Funan Kitchen Reservation'),
       ),
       body: Center(
         child: Column(
@@ -52,6 +49,15 @@ class _HomeScreenState extends State<HomeScreen> {
           children: <Widget>[
             // If email is entered, show the email and the modify button
             if (_isEmailEntered) ...[
+              Text(
+                'Welcome to LYF Funan!',
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue
+                ),
+              ),
+              SizedBox(height: 10),
               Text(
                 'Email: $_email',
                 style: TextStyle(fontSize: 20),

@@ -21,12 +21,27 @@ class _ReservationScreenState extends State<ReservationScreen> {
   }
 
   void _fetchAvailableSlots() async {
-    Map<TimeOfDay, bool> slots =
-    await SupabaseService().getAvailableSlots(_selectedDate);
+    Map<TimeOfDay, bool> slots = await SupabaseService().getAvailableSlots(_selectedDate);
     setState(() {
       _slotAvailability = slots;
     });
   }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(Duration(days: 7)),
+    );
+    if (pickedDate != null && pickedDate != _selectedDate) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+      _fetchAvailableSlots();
+    }
+  }
+
 
   void _reserveSlot(TimeOfDay time) async {
     String _email = widget.email;
@@ -39,7 +54,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
       time.minute,
     );
 
-    bool success = await SupabaseService().reserveSlot(_email, startTime, 30);
+    bool success = await SupabaseService().reserveSlot(_email, startTime, 60);
     if (success) {
       Navigator.push(
         context,
@@ -70,12 +85,28 @@ class _ReservationScreenState extends State<ReservationScreen> {
         children: [
           Padding(
             padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Available Slots for ${widget.email}',
-              style: TextStyle(fontSize: 20),
+            child: Column(
+              children: [
+                Text(
+                  'Available Slots for ${widget.email}',
+                  style: TextStyle(fontSize: 20),
+                ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Selected Date: $formattedDate'),
+                    SizedBox(width: 10),
+                    ElevatedButton(
+                      onPressed: () => _selectDate(context), // Open Date Picker
+                      child: Text('Select Date'),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          Text('Available Slots on $formattedDate'),
+//          Text('Available Slots on $formattedDate'),
           Expanded(
             child: ListView.builder(
               itemCount: _slotAvailability.length,
@@ -83,7 +114,9 @@ class _ReservationScreenState extends State<ReservationScreen> {
                 TimeOfDay time = _slotAvailability.keys.elementAt(index);
                 bool isAvailable = _slotAvailability[time]!;
                 return ListTile(
-                  title: Text('${time.format(context)}'),
+                  // show start to end time in title
+
+                  title: Text('${time.format(context)} - ${(time.replacing(minute: time.minute + 59)).format(context)}'),
                   trailing: ElevatedButton(
                     child: Text(isAvailable ? 'Reserve' : 'Occupied'),
                     onPressed: isAvailable

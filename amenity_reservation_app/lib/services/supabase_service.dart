@@ -46,7 +46,7 @@ class SupabaseService {
     try {
       Map<TimeOfDay, bool> slotAvailability = {};
       for (int hour = 0; hour < 24; hour++) {
-        for (int minute = 0; minute < 60; minute += 30) {
+        for (int minute = 0; minute < 60; minute += 60) {
           slotAvailability[TimeOfDay(hour: hour, minute: minute)] = true;
         }
       }
