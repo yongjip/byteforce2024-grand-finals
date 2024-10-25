@@ -216,6 +216,7 @@ class SupabaseService {
           'reservation_id': reservationId,
           'meal_kit_id': kit.id,
           'meal_kit_name': kit.name,
+          'price': kit.price,
           'quantity': mealKitsWithQuantities[kit],
         };
         await supabase.from('reservationmealkits').insert(link);

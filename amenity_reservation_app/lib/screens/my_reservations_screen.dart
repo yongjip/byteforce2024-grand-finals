@@ -75,7 +75,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: res.orderedMealKits
                           .map((link) =>
-                          Text('${link.mealKitName} x${link.quantity}'))
+                          Text('${link.mealKitName} x${link.quantity} @ \$${link.price} Total = \$${link.price * link.quantity}'))
                           .toList(),
                     ),
 
