@@ -39,31 +39,38 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
   }
 
   void _confirmMealKitOrder() async {
-    if (_isLoading) return; // Prevent multiple taps
+    if (_isLoading) return;
     setState(() {
       _isLoading = true;
     });
 
-    bool orderConfirmed = await SupabaseService().addMealKitsToReservation(
-      widget.email,
-      widget.reservationTime,
-      _selectedMealKitsWithQuantities,
-    );
+    try {
+      // Add meal kits to reservation
+      bool orderConfirmed = await SupabaseService().addMealKitsToReservation(
+        widget.email,
+        widget.reservationTime,
+        _selectedMealKitsWithQuantities,
+      );
 
-    if (orderConfirmed) {
+      if (orderConfirmed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Meal Kits Added to Reservation')),
+        );
+        // Navigate to the main page
+        Navigator.popUntil(context, (route) => route.isFirst);
+      } else {
+        throw Exception('Failed to confirm meal kit order. Please try again.');
+      }
+    } catch (e) {
+      // Display the exact error message from the exception
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Meal Kits Added to Reservation')),
+        SnackBar(content: Text(e.toString())),
       );
-      Navigator.popUntil(context, (route) => route.isFirst);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to confirm meal kit order')),
-      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
-
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   void _showMealKitDetails(MealKit kit) {
