@@ -6,6 +6,7 @@ import 'meal_kits_screen.dart';
 class ReservationScreen extends StatefulWidget {
   final String email;
   ReservationScreen({required this.email});
+
   @override
   _ReservationScreenState createState() => _ReservationScreenState();
 }
@@ -42,7 +43,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
     }
   }
 
-
   void _reserveSlot(TimeOfDay time) async {
     String _email = widget.email;
 
@@ -72,10 +72,15 @@ class _ReservationScreenState extends State<ReservationScreen> {
     }
   }
 
+  String _formatTimeOfDay(TimeOfDay time) {
+    final now = DateTime.now();
+    final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+    return DateFormat('HH:mm').format(dt);
+  }
+
   @override
   Widget build(BuildContext context) {
     String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
-
 
     return Scaffold(
       appBar: AppBar(
@@ -98,7 +103,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     Text('Selected Date: $formattedDate'),
                     SizedBox(width: 10),
                     ElevatedButton(
-                      onPressed: () => _selectDate(context), // Open Date Picker
+                      onPressed: () => _selectDate(context),
                       child: Text('Select Date'),
                     ),
                   ],
@@ -106,31 +111,29 @@ class _ReservationScreenState extends State<ReservationScreen> {
               ],
             ),
           ),
-//          Text('Available Slots on $formattedDate'),
           Expanded(
             child: ListView.builder(
               itemCount: _slotAvailability.length,
               itemBuilder: (context, index) {
                 TimeOfDay time = _slotAvailability.keys.elementAt(index);
                 bool isAvailable = _slotAvailability[time]!;
-                return ListTile(
-                  // show start to end time in title
+                String startTimeFormatted = _formatTimeOfDay(time);
+                String endTimeFormatted = _formatTimeOfDay(
+                    time.replacing(minute: (time.minute + 59) % 60));
 
-                  title: Text('${time.format(context)} - ${(time.replacing(minute: time.minute + 59)).format(context)}'),
+                return ListTile(
+                  title: Text('$startTimeFormatted - $endTimeFormatted'),
                   trailing: ElevatedButton(
                     child: Text(isAvailable ? 'Reserve' : 'Occupied'),
-                    onPressed: isAvailable
-                      ? () => _reserveSlot(time)
-                        : null,
+                    onPressed: isAvailable ? () => _reserveSlot(time) : null,
                     style: ElevatedButton.styleFrom(
                       disabledForegroundColor: Colors.grey,
-                    )
-                  )
+                    ),
+                  ),
                 );
               },
             ),
           ),
-          // Adding padding to the bottom for iPhone's home indicator
           SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
         ],
       ),
