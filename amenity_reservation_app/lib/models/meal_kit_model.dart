@@ -5,6 +5,7 @@ class MealKit {
   final List<String> ingredients;
   final String recipe;
   final double price;
+  final String imageUrl; // New property for image URL
 
   MealKit({
     required this.id,
@@ -13,6 +14,7 @@ class MealKit {
     required this.ingredients,
     required this.recipe,
     required this.price,
+    required this.imageUrl, // Default to an empty string
   });
 
   factory MealKit.fromMap(Map<String, dynamic> map) {
@@ -23,6 +25,7 @@ class MealKit {
       ingredients: List<String>.from(map['ingredients'] ?? []),
       recipe: map['recipe'] ?? '',
       price: (map['price'] as num).toDouble(),
+      imageUrl: map['image_url'] ?? '', // Assign image URL
     );
   }
 }

@@ -66,11 +66,21 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (kit.imageUrl.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Image.network(
+                      kit.imageUrl,
+                      width: 200, // Set fixed width
+                      height: 150, // Set fixed height
+                      fit: BoxFit.cover, // Ensures the image fills the box while keeping its aspect ratio
+                    ),
+                  ),
                 Text('Ingredients:'),
                 Text(kit.ingredients.join(', ')),
                 SizedBox(height: 10),
                 Text('Recipe:'),
-                Text(kit.recipe.replaceAll('\\n', '\n')), // Replace with actual new lines
+                Text(kit.recipe.replaceAll('\\n', '\n')),
               ],
             ),
           ),
@@ -84,6 +94,7 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +111,16 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
                 MealKit kit = _mealKits[index];
                 int quantity = _selectedMealKitsWithQuantities[kit] ?? 0;
                 return ListTile(
-                  title: Text(kit.name),
+                  leading: kit.imageUrl.isNotEmpty
+                      ? SizedBox(
+                    width: 60, // Set fixed width
+                    height: 60, // Set fixed height
+                    child: Image.network(
+                      kit.imageUrl,
+                      fit: BoxFit.cover, // Ensures the image fills the box while keeping its aspect ratio
+                    ),
+                  )
+                      : Icon(Icons.image, size: 50), // Placeholder if no image                  title: Text(kit.name),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
