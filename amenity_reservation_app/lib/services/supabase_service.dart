@@ -125,6 +125,7 @@ class SupabaseService {
 
       if (totalMinutes + durationMinutes > 180) {
         // Exceeds daily limit
+        print('User has already reserved more than 3 hours for this date.');
         return false;
       }
 
@@ -135,12 +136,13 @@ class SupabaseService {
         'end_time': startTime.add(Duration(minutes: durationMinutes)).toIso8601String(),
       };
 
-      // Use lowercase table name 'reservations'
+      // Insert reservation into the database
       await supabase.from('reservations').insert(reservation);
 
       return true;
     } catch (e) {
       // Handle error
+      print('Error reserving slot: $e');
       return false;
     }
   }
