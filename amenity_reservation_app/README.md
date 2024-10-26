@@ -1,30 +1,24 @@
-# amenity_reservation_app
+# 🌟 Project: LYF Funan Kitchen Reservation App 🌟
 
-LYF Funan Kitchen Reservation App
+## Objective
+Our project aims to increase utilization of LYF Funan’s shared kitchen amenity by making it easier and more engaging for residents to reserve and use the kitchen space. With our app, residents can confidently reserve their cooking slots, knowing they’ll have the space they need – whether they want to cook solo, with friends, other residents, or even while creating a YouTube cooking video!
 
-Tech Stack:
-- Database: Supabase
-- Frontend: Flutter
+## Key Features
+1. **Simple Reservations:**  
+   Book a time slot to ensure the kitchen is ready when needed. Slots are available in 30-minute units, up to 3 hours per day, making it easy to find a time that fits.
 
-Purpose:
+2. **Social Cooking & Community Building:**  
+   Residents can team up with friends or connect with fellow residents through shared cooking experiences.
 
-The LYF Funan Kitchen Reservation App allows users to seamlessly reserve kitchen slots at LYF Funan. Users can view available slots, make reservations, and cancel them if necessary. Additionally, users can enhance their cooking experience by purchasing meal kits from local restaurants directly through the app.
+3. **Culinary Exploration with Local Flavors:**  
+   Buy unique meal kits sourced from local Singaporean restaurants, complete with recipes and ingredients, allowing residents to cook special dishes right in the LYF kitchen.
 
-Key Features:
-Slot Reservations:
-- Users can view and reserve available 30-minute kitchen slots.
-- Users can reserve up to 3 hours of kitchen time per day. 
+4. **Seamless Experience:**  
+   No logins are required – residents simply input their email address to make and manage reservations.
 
-Meal Kit Purchases:
+## Why This Matters
+This app turns LYF’s kitchen into a vibrant community hub where residents can learn, share, and connect. By offering curated meal kits, residents get a taste of Singaporean cuisine in the comfort of their co-living space. It’s more than just a kitchen; it’s a unique space for creativity, socializing, and culinary discovery, all made easier and more accessible through our app.
 
-- While reserving a slot, users can explore meal kits offered by local restaurants.
-- They can view the recipe and ingredients of each meal kit before purchasing. 
+---
 
-Reservation Management:
-
-- Users can view their current reservations and cancel them if needed.
-- Users can also check their past reservations and the meal kits they’ve previously purchased. 
-
-No Login Required:
-
-- Users can make reservations simply by entering their email address, eliminating the need for account creation.
+This project is all about making LYF Funan’s kitchen a lively and accessible amenity where residents can cook up great food, meaningful connections, and memorable experiences!
