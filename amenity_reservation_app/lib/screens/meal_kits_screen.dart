@@ -38,23 +38,41 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
   }
 
   void _confirmReservation() async {
-    bool success = await SupabaseService().addMealKitsToReservation(
+    // First, add the meal kits to the reservation
+    bool orderConfirmed = await SupabaseService().addMealKitsToReservation(
       widget.email,
       widget.reservationTime,
       _selectedMealKitsWithQuantities,
     );
 
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Reservation Confirmed')),
+    if (orderConfirmed) {
+      // Only proceed to reserve the slot if the meal kit order was successful
+      bool reservationMade = await SupabaseService().reserveSlot(
+        widget.email,
+        widget.reservationTime,
+        60, // Duration in minutes
       );
-      Navigator.popUntil(context, (route) => route.isFirst);
+
+      if (reservationMade) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Reservation Confirmed')),
+        );
+        Navigator.popUntil(context, (route) => route.isFirst);
+      } else {
+        // If reservation fails after meal kit order is confirmed
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to reserve slot')),
+        );
+        // Optionally, you might want to rollback or inform the user
+      }
     } else {
+      // If meal kit order fails, show a failure message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to confirm reservation')),
+        SnackBar(content: Text('Failed to confirm meal kit order')),
       );
     }
   }
+
 
   void _showMealKitDetails(MealKit kit) {
     showDialog(
