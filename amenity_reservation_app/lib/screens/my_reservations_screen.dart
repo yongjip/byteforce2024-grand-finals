@@ -23,6 +23,9 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
 
   void _fetchReservations() async {
     List<Reservation> res = await SupabaseService().getUserReservations(widget.email);
+    // Sort reservations by start time in ascending order
+    res.sort((a, b) => a.startTime.compareTo(b.startTime));
+
     setState(() {
       _reservations = res;
     });
