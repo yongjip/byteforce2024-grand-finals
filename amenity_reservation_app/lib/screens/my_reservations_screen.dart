@@ -86,7 +86,8 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Reservation at $formattedTime',
+                        // Reservation time
+                        Text('$formattedTime',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                         SizedBox(height: 8),
                         Text('Ordered Meal Kits:', style: TextStyle(fontSize: 16)),
