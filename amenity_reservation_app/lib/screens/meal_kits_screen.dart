@@ -70,7 +70,7 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
                 Text(kit.ingredients.join(', ')),
                 SizedBox(height: 10),
                 Text('Recipe:'),
-                Text(kit.recipe),
+                Text(kit.recipe.replaceAll('\\n', '\n')), // Replace with actual new lines
               ],
             ),
           ),
