@@ -33,8 +33,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
       return _selectedDate.day == now.day &&
           _selectedDate.month == now.month &&
           _selectedDate.year == now.year &&
-          (time.hour < currentTimeOfDay.hour ||
-              (time.hour == currentTimeOfDay.hour && time.minute < currentTimeOfDay.minute));
+          (time.hour < currentTimeOfDay.hour);
     });
 
     setState(() {
