@@ -14,6 +14,7 @@ class MyReservationsScreen extends StatefulWidget {
 
 class _MyReservationsScreenState extends State<MyReservationsScreen> {
   List<Reservation> _reservations = [];
+  bool _showPastReservations = false; // Toggle for showing past reservations
 
   @override
   void initState() {
@@ -23,7 +24,6 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
 
   void _fetchReservations() async {
     List<Reservation> res = await SupabaseService().getUserReservations(widget.email);
-    // Sort reservations by start time in ascending order
     res.sort((a, b) => a.startTime.compareTo(b.startTime));
 
     setState(() {
@@ -55,6 +55,14 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    DateTime now = DateTime.now();
+
+    // Separate current/future and past reservations
+    List<Reservation> currentAndFutureReservations =
+    _reservations.where((res) => res.startTime.isAfter(now) || res.startTime.isAtSameMomentAs(now)).toList();
+    List<Reservation> pastReservations =
+    _reservations.where((res) => res.startTime.isBefore(now)).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('My Reservations'),
@@ -69,17 +77,20 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
             ),
           ),
           ElevatedButton(
-            child: Text('Fetch Reservations'),
-            onPressed: _fetchReservations,
+            child: Text(_showPastReservations ? 'Show Current & Future Reservations' : 'Show Past Reservations'),
+            onPressed: () {
+              setState(() {
+                _showPastReservations = !_showPastReservations;
+              });
+            },
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: _reservations.length,
+              itemCount: _showPastReservations ? pastReservations.length : currentAndFutureReservations.length,
               itemBuilder: (context, index) {
-                Reservation res = _reservations[index];
+                Reservation res = _showPastReservations ? pastReservations[index] : currentAndFutureReservations[index];
                 String formattedTime = DateFormat('yyyy-MM-dd HH:mm').format(res.startTime);
 
-                // Calculate the total price for all meal kits in this reservation
                 double totalPrice = _calculateTotalPrice(res.orderedMealKits);
 
                 return Card(
@@ -89,9 +100,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Reservation time
-                        Text('$formattedTime',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('$formattedTime', style: TextStyle(fontWeight: FontWeight.bold)),
                         SizedBox(height: 8),
                         Text('Ordered Meal Kits:', style: TextStyle(fontSize: 16)),
                         Column(
@@ -109,24 +118,23 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                           children: [
                             Text(
                               'Total Price:',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                             Text(
                               '\$${totalPrice.toStringAsFixed(2)}',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
                         SizedBox(height: 10),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: ElevatedButton(
-                            child: Text('Cancel'),
-                            onPressed: () => _cancelReservation(res.id),
+                        if (!_showPastReservations)
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: ElevatedButton(
+                              child: Text('Cancel'),
+                              onPressed: () => _cancelReservation(res.id),
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -134,7 +142,6 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
               },
             ),
           ),
-          // Adding padding to the bottom for iPhone's home indicator
           SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
         ],
       ),
