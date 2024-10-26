@@ -23,6 +23,20 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
   void _fetchAvailableSlots() async {
     Map<TimeOfDay, bool> slots = await SupabaseService().getAvailableSlots(_selectedDate);
+
+    // Filter out past times
+    final now = DateTime.now();
+    final currentTimeOfDay = TimeOfDay.fromDateTime(now);
+
+    slots.removeWhere((time, available) {
+      // If the selected date is today, remove past times
+      return _selectedDate.day == now.day &&
+          _selectedDate.month == now.month &&
+          _selectedDate.year == now.year &&
+          (time.hour < currentTimeOfDay.hour ||
+              (time.hour == currentTimeOfDay.hour && time.minute < currentTimeOfDay.minute));
+    });
+
     setState(() {
       _slotAvailability = slots;
     });
