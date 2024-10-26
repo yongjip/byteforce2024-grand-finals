@@ -14,6 +14,7 @@ class ReservationScreen extends StatefulWidget {
 class _ReservationScreenState extends State<ReservationScreen> {
   DateTime _selectedDate = DateTime.now();
   Map<TimeOfDay, bool> _slotAvailability = {};
+  bool _isLoading = false; // Add a loading state
 
   @override
   void initState() {
@@ -24,12 +25,10 @@ class _ReservationScreenState extends State<ReservationScreen> {
   void _fetchAvailableSlots() async {
     Map<TimeOfDay, bool> slots = await SupabaseService().getAvailableSlots(_selectedDate);
 
-    // Filter out past times
     final now = DateTime.now();
     final currentTimeOfDay = TimeOfDay.fromDateTime(now);
 
     slots.removeWhere((time, available) {
-      // If the selected date is today, remove past times
       return _selectedDate.day == now.day &&
           _selectedDate.month == now.month &&
           _selectedDate.year == now.year &&
@@ -56,9 +55,14 @@ class _ReservationScreenState extends State<ReservationScreen> {
     }
   }
 
-  void _reserveSlot(TimeOfDay time) async {
-    String _email = widget.email;
+  Future<void> _reserveSlot(TimeOfDay time) async {
+    if (_isLoading) return; // Prevent further clicks if loading
 
+    setState(() {
+      _isLoading = true;
+    });
+
+    String _email = widget.email;
     DateTime startTime = DateTime(
       _selectedDate.year,
       _selectedDate.month,
@@ -68,6 +72,11 @@ class _ReservationScreenState extends State<ReservationScreen> {
     );
 
     bool success = await SupabaseService().reserveSlot(_email, startTime, 60);
+
+    setState(() {
+      _isLoading = false;
+    });
+
     if (success) {
       Navigator.push(
         context,
@@ -137,8 +146,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
                 return ListTile(
                   title: Text('$startTimeFormatted - $endTimeFormatted'),
                   trailing: ElevatedButton(
-                    child: Text(isAvailable ? 'Reserve' : 'Occupied'),
-                    onPressed: isAvailable ? () => _reserveSlot(time) : null,
+                    child: _isLoading ? CircularProgressIndicator() : Text(isAvailable ? 'Reserve' : 'Occupied'),
+                    onPressed: isAvailable && !_isLoading ? () => _reserveSlot(time) : null,
                     style: ElevatedButton.styleFrom(
                       disabledForegroundColor: Colors.grey,
                     ),

@@ -15,6 +15,7 @@ class MealKitsScreen extends StatefulWidget {
 class _MealKitsScreenState extends State<MealKitsScreen> {
   List<MealKit> _mealKits = [];
   Map<MealKit, int> _selectedMealKitsWithQuantities = {};
+  bool _isLoading = false; // Loading state to prevent multiple submissions
 
   @override
   void initState() {
@@ -37,8 +38,12 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
     return total;
   }
 
-  void _confirmReservation() async {
-    // First, add the meal kits to the reservation
+  void _confirmMealKitOrder() async {
+    if (_isLoading) return; // Prevent multiple taps
+    setState(() {
+      _isLoading = true;
+    });
+
     bool orderConfirmed = await SupabaseService().addMealKitsToReservation(
       widget.email,
       widget.reservationTime,
@@ -46,33 +51,20 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
     );
 
     if (orderConfirmed) {
-      // Only proceed to reserve the slot if the meal kit order was successful
-      bool reservationMade = await SupabaseService().reserveSlot(
-        widget.email,
-        widget.reservationTime,
-        60, // Duration in minutes
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Meal Kits Added to Reservation')),
       );
-
-      if (reservationMade) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Reservation Confirmed')),
-        );
-        Navigator.popUntil(context, (route) => route.isFirst);
-      } else {
-        // If reservation fails after meal kit order is confirmed
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to reserve slot')),
-        );
-        // Optionally, you might want to rollback or inform the user
-      }
+      Navigator.popUntil(context, (route) => route.isFirst);
     } else {
-      // If meal kit order fails, show a failure message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to confirm meal kit order')),
       );
     }
-  }
 
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   void _showMealKitDetails(MealKit kit) {
     showDialog(
@@ -89,9 +81,9 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
                     padding: const EdgeInsets.only(bottom: 16.0),
                     child: Image.network(
                       kit.imageUrl,
-                      width: 200, // Set fixed width
-                      height: 150, // Set fixed height
-                      fit: BoxFit.cover, // Ensures the image fills the box while keeping its aspect ratio
+                      width: 200,
+                      height: 150,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 Text('Ingredients:'),
@@ -113,7 +105,6 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,14 +122,15 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
                 return ListTile(
                   leading: kit.imageUrl.isNotEmpty
                       ? SizedBox(
-                    width: 60, // Set fixed width
-                    height: 60, // Set fixed height
+                    width: 60,
+                    height: 60,
                     child: Image.network(
                       kit.imageUrl,
-                      fit: BoxFit.cover, // Ensures the image fills the box while keeping its aspect ratio
+                      fit: BoxFit.cover,
                     ),
                   )
-                      : Icon(Icons.image, size: 50), // Placeholder if no image                  title: Text(kit.name),
+                      : Icon(Icons.image, size: 50),
+                  title: Text(kit.name),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -188,13 +180,14 @@ class _MealKitsScreenState extends State<MealKitsScreen> {
                 ),
                 SizedBox(height: 16),
                 ElevatedButton(
-                  child: Text('Confirm Reservation'),
-                  onPressed: _confirmReservation,
+                  child: _isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text('Confirm Meal Kits'),
+                  onPressed: _isLoading ? null : _confirmMealKitOrder,
                 ),
               ],
             ),
           ),
-          // Adding padding to the bottom for iPhone's home indicator
           SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
         ],
       ),
