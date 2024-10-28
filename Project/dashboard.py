@@ -169,11 +169,12 @@ if selection == "For Customers":
     day_of_week_list = [
         'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
     ]
+    todays_dow = datetime.datetime.now().strftime('%A')
     # Customer Filters
     st.sidebar.header("Customer Filters")
     selected_hotel = st.sidebar.selectbox("Select Hotel", options=list(hotel_amenities.keys()))
     selected_amenity = st.sidebar.selectbox("Select Amenity", options=hotel_amenities[selected_hotel])
-    selected_day = st.sidebar.selectbox("Select Day of Week", options=day_of_week_list)
+    selected_day = st.radio("Select Day of Week", options=day_of_week_list, index=day_of_week_list.index(todays_dow), horizontal=True)
 
     # Filter historical data
     historical_data = hotel_avg_usage_df[
