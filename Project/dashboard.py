@@ -366,7 +366,8 @@ elif selection == "For Hotel Management":
 
 elif selection == "Anomaly Detection - Case of Burner Breakdown":
 
-    # Sample Data
+
+    # Sample data
     data = pd.DataFrame({
         "Date": pd.date_range("2024-07-20", periods=100),
         "Utilization": [0.79,0.77,0.75,0.8,0.77,0.8,0.78,0.78,0.75,0.77,0.77,0.79,0.79,0.73,0.75,0.74,0.75,0.77,0.72,0.72,0.8,0.71,0.7,0.78,0.63,0.68,0.62,0.7,0.7,0.62,0.67,0.7,0.69,0.66,0.6,0.68,0.68,0.61,0.65,0.7,0.64,0.7,0.7,0.62,0.68,0.61,0.61,0.67,0.65,0.65,0.53,0.54,0.6,0.59,0.51,0.54,0.53,0.58,0.57,0.53,0.52,0.52,0.58,0.5,0.54,0.56,0.51,0.53,0.6,0.59,0.57,0.6,0.52,0.58,0.12,0.19,0.18,0.1,0.13,0.14,0.16,0.13,0.14,0.2,0.14,0.1,0.12,0.13,0.17,0.14,0.2,0.1,0.12,0.16,0.12,0.14,0.12,0.11,0.12,0.15]
@@ -379,9 +380,6 @@ elif selection == "Anomaly Detection - Case of Burner Breakdown":
         "Text": ["1 Burner Broken", "2 Burners Broken", "3 Burners Broken"]  # Annotation text
     })
     annotations["Date"] = pd.to_datetime(annotations["Date"])
-
-    # Merge data for alignment
-    data_with_annotations = pd.merge(data, annotations, on=["Date", "Utilization"], how="left")
 
     # Create a line chart with Altair
     line_chart = alt.Chart(data).mark_line(color='steelblue').encode(
@@ -396,22 +394,35 @@ elif selection == "Anomaly Detection - Case of Burner Breakdown":
         )
     ).interactive()
 
-    # Create annotations as text marks with dynamic positioning
-    # We'll offset annotations upwards if utilization > 0.7, else downwards
-    annotations = annotations.merge(data, on=["Date", "Utilization"], how="left")
-    annotations['dy'] = annotations['Utilization'].apply(lambda x: -10 if x > 0.7 else 10)
+    # Dates for multiple vertical lines
+    vertical_line_dates = pd.DataFrame({
+        "Date": ["2024-08-12", "2024-09-08", "2024-10-02"]
+    })
+    vertical_line_dates["Date"] = pd.to_datetime(vertical_line_dates["Date"])
 
+    # Vertical lines for each date in vertical_line_dates
+    vertical_lines = alt.Chart(vertical_line_dates).mark_rule(
+        color="white",
+        strokeDash=[5, 5]
+    ).encode(
+        x="Date:T"
+    )
+
+    # Create annotations with alternating `dy` to avoid overlap
     annotation_layer = alt.Chart(annotations).mark_text(
-        align='left',
-        baseline='middle',
         color='red',
         fontSize=14,
-        dx=5
+        dx=-60
     ).encode(
         x="Date:T",
-        y=alt.Y("Utilization:Q", title='Utilization', axis=alt.Axis(format='%')),
-        text="Text:N",
-        # dy="dy:Q"
+        y="Utilization:Q",
+        text="Text:N"
+    ).transform_calculate(
+        # Alternating dy values for each annotation
+        dy="if(datum.Utilization < 0.1, -10, 10)"
+    ).properties(
+        width=800,
+        height=400
     )
 
     # Optionally, add circles to highlight the annotated points
@@ -424,8 +435,8 @@ elif selection == "Anomaly Detection - Case of Burner Breakdown":
         tooltip=["Date:T", "Utilization:Q", "Text:N"]
     )
 
-    # Combine the line chart and annotations
-    chart_with_annotations = (line_chart + highlight_points + annotation_layer).properties(
+    # Combine the line chart, annotations, and vertical lines
+    chart_with_annotations = (line_chart + highlight_points + annotation_layer + vertical_lines).properties(
         width=800,
         height=400
     )
