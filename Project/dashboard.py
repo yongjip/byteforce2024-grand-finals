@@ -181,7 +181,14 @@ st.title("Lyf Space: Enhancing Communal Spaces through Data-Driven Insights")
 
 # Navigation
 st.sidebar.title("Navigation")
-selection = st.sidebar.radio("Go to", ["For Customers", "For Hotel Management"])
+selection = st.sidebar.radio(
+    "Go to",
+    [
+        "For Customers",
+        "For Hotel Management",
+        "Anomaly Detection - Case of Burner Breakdown",
+    ]
+)
 
 if selection == "For Customers":
     st.header("Amenity Usage Insights")
@@ -215,7 +222,7 @@ if selection == "For Customers":
 
     real_time_data_hist = generate_fake_real_time_todays_data(selected_hotel, selected_amenity, selected_day)
     # Generate fake real-time data
-    @st.fragment(run_every=5)
+    @st.fragment(run_every=10)
     def refresh_live_data():
         real_time_data_new = generate_fake_real_time_data(selected_hotel, selected_amenity, selected_day)
         if len(real_time_data_hist) > 0:
@@ -343,7 +350,7 @@ elif selection == "For Hotel Management":
         width=700,
         height=400,
         title=f"{selected_metric} for {selected_amenity} at {control_hotel} vs {treatment_hotel}"
-    ).interactive()
+    )
 
     st.altair_chart(line_chart, use_container_width=True)
 
@@ -356,6 +363,80 @@ elif selection == "For Hotel Management":
     # Additional Data Table
     st.subheader("Detailed Metrics")
     st.dataframe(aggregated_data)
+
+elif selection == "Anomaly Detection - Case of Burner Breakdown":
+
+    # Sample Data
+    data = pd.DataFrame({
+        "Date": pd.date_range("2024-07-20", periods=100),
+        "Utilization": [0.79,0.77,0.75,0.8,0.77,0.8,0.78,0.78,0.75,0.77,0.77,0.79,0.79,0.73,0.75,0.74,0.75,0.77,0.72,0.72,0.8,0.71,0.7,0.78,0.63,0.68,0.62,0.7,0.7,0.62,0.67,0.7,0.69,0.66,0.6,0.68,0.68,0.61,0.65,0.7,0.64,0.7,0.7,0.62,0.68,0.61,0.61,0.67,0.65,0.65,0.53,0.54,0.6,0.59,0.51,0.54,0.53,0.58,0.57,0.53,0.52,0.52,0.58,0.5,0.54,0.56,0.51,0.53,0.6,0.59,0.57,0.6,0.52,0.58,0.12,0.19,0.18,0.1,0.13,0.14,0.16,0.13,0.14,0.2,0.14,0.1,0.12,0.13,0.17,0.14,0.2,0.1,0.12,0.16,0.12,0.14,0.12,0.11,0.12,0.15]
+    })
+
+    # Define annotation points
+    annotations = pd.DataFrame({
+        "Date": ["2024-08-12", "2024-09-08", "2024-10-02"],  # Dates to annotate
+        "Utilization": [.68, .52, .14],  # Corresponding values
+        "Text": ["1 Burner Broken", "2 Burners Broken", "3 Burners Broken"]  # Annotation text
+    })
+    annotations["Date"] = pd.to_datetime(annotations["Date"])
+
+    # Merge data for alignment
+    data_with_annotations = pd.merge(data, annotations, on=["Date", "Utilization"], how="left")
+
+    # Create a line chart with Altair
+    line_chart = alt.Chart(data).mark_line(color='steelblue').encode(
+        x=alt.X("Date:T", title='Date'),
+        y=alt.Y("Utilization:Q", axis=alt.Axis(format='%')),
+        tooltip=['Date:T', 'Utilization:Q']
+    ).properties(
+        title=alt.TitleParams(
+            text="Kitchen Space Utilization",
+            align="center",
+            anchor="middle"  # Centering the title
+        )
+    ).interactive()
+
+    # Create annotations as text marks with dynamic positioning
+    # We'll offset annotations upwards if utilization > 0.7, else downwards
+    annotations = annotations.merge(data, on=["Date", "Utilization"], how="left")
+    annotations['dy'] = annotations['Utilization'].apply(lambda x: -10 if x > 0.7 else 10)
+
+    annotation_layer = alt.Chart(annotations).mark_text(
+        align='left',
+        baseline='middle',
+        color='red',
+        fontSize=14,
+        dx=5
+    ).encode(
+        x="Date:T",
+        y=alt.Y("Utilization:Q", title='Utilization', axis=alt.Axis(format='%')),
+        text="Text:N",
+        # dy="dy:Q"
+    )
+
+    # Optionally, add circles to highlight the annotated points
+    highlight_points = alt.Chart(annotations).mark_circle(
+        size=100,
+        color='red'
+    ).encode(
+        x="Date:T",
+        y="Utilization:Q",
+        tooltip=["Date:T", "Utilization:Q", "Text:N"]
+    )
+
+    # Combine the line chart and annotations
+    chart_with_annotations = (line_chart + highlight_points + annotation_layer).properties(
+        width=800,
+        height=400
+    )
+
+    # Display in Streamlit
+    st.altair_chart(chart_with_annotations, use_container_width=True)
+
+    st.markdown("""
+    **Note:** The annotations are dynamically positioned to avoid overlapping with the data points. High utilization points have annotations above the line, while low utilization points have annotations below the line.
+    """)
+
 
 else:
     st.write("Please select a section from the navigation menu.")
