@@ -224,7 +224,6 @@ if selection == "For Customers":
             tooltip=['hour:Q', 'UsageCount:Q']
         )
 
-        print(comparison_long[comparison_long['Type'] == 'usage_count_real_time'])
         live_bars = alt.Chart(comparison_long[comparison_long['Type'] == 'usage_count_real_time']).mark_bar(
             opacity=0.6,
             color='#E74C3C',  # Softer red
