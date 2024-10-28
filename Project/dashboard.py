@@ -155,6 +155,16 @@ hotel_usage_data.loc[:, 'revenue_per_m_squared'] = hotel_usage_data['revenue_con
 hotel_usage_data.to_clipboard()
 print(hotel_usage_data)
 
+"""
+columns
+usage_count: number of people using the amenity
+usage_contribution: percentage of total amenity usage for the hotel on that day
+revenue_contribution_amt: revenue contribution from the amenity usage
+revenue_per_m_squared: revenue per square meter of the amenity
+amenity_size_m_squared: size of the amenity in square meters
+
+"""
+
 # def generate_live_data():
 #     faker.Faker.seed(42)
 #     fake = faker.Faker()
