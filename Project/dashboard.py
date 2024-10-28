@@ -125,18 +125,7 @@ hotel_usage_data['resident_count'] = hotel_usage_data.apply(lambda x: avg_reserv
 # Prepare average usage data
 hotel_avg_usage_df = hotel_usage_data.groupby(['hotel_name', 'amenity', 'amenity_size_m_squared', 'day_of_week', 'hour']).mean().reset_index()
 hotel_avg_usage_df.drop(['usage_count_total'], axis=1, inplace=True)
-#
-# # Create fake real-time data (to be replaced with actual data from Arduino)
-# def generate_fake_real_time_data(hotel_name, amenity, day_of_week):
-#     real_time_data = []
-#     for hour in range(24):
-#         usage_pct = randomize_usage(hour_usage_pct[hour])
-#         size_of_amenity = get_amenity_size(hotel_name, amenity)
-#         avg_resident_count = avg_reservation_cnt_dict[(hotel_name, day_of_week)]
-#         usage_cnt = int((avg_resident_count * usage_pct) * (size_of_amenity / 100))
-#         real_time_data.append({'hour': hour, 'usage_count': usage_cnt})
-#     real_time_df = pd.DataFrame(real_time_data)
-#     return real_time_df
+
 
 # Create fake real-time data (to be replaced with actual data from Arduino)
 def generate_fake_real_time_todays_data(hotel_name, amenity, day_of_week):
@@ -147,7 +136,7 @@ def generate_fake_real_time_todays_data(hotel_name, amenity, day_of_week):
     # print(current_hour, current_dow)
     if current_dow != day_of_week:
         real_time_data.append({'hour': 0, 'usage_count': 0})
-        return pd.DataFrame(real_time_data)
+        return real_time_data
     for hour in range(0, current_hour + 1):
         usage_pct = randomize_usage(hour_usage_pct[hour], min_max_pct=0.7)
         size_of_amenity = get_amenity_size(hotel_name, amenity)
@@ -170,7 +159,7 @@ def generate_fake_real_time_data(hotel_name, amenity, day_of_week):
     # print(current_hour, current_dow)
     if current_dow != day_of_week:
         real_time_data.append({'hour': 0, 'usage_count': 0})
-        return pd.DataFrame(real_time_data)
+        return real_time_data
     for hour in range(0, current_hour + 1):
         usage_pct = randomize_usage(hour_usage_pct[hour], min_max_pct=0.7)
         size_of_amenity = get_amenity_size(hotel_name, amenity)
@@ -227,7 +216,10 @@ if selection == "For Customers":
     @st.fragment(run_every=5)
     def refresh_live_data():
         real_time_data_new = generate_fake_real_time_data(selected_hotel, selected_amenity, selected_day)
-        real_time_data_hist[-1] = real_time_data_new[-1]
+        if len(real_time_data_hist) > 0:
+            real_time_data_hist[-1] = real_time_data_new[-1]
+        else:
+            pass
         real_time_data = pd.DataFrame(real_time_data_hist)
         # Merge historical and real-time data
         comparison_df = pd.merge(historical_data, real_time_data, on='hour', suffixes=('_historical', '_real_time'), how='outer')
@@ -274,9 +266,6 @@ if selection == "For Customers":
         st.altair_chart(combined_chart, use_container_width=True)
 
     refresh_live_data()
-    st.markdown("""
-    **Note:** The real-time data is currently simulated and will be replaced with actual data collected from sensors.
-    """)
 
 elif selection == "For Hotel Management":
     st.header("Amenity Utilization and Revenue Optimization")
