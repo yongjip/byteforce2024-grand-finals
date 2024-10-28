@@ -1,0 +1,16 @@
+hotel_amenity_id,hotel_id,hotel_name,amenity_id,amenity_name,meter_square
+1,1,LYF Funan Singapore,1,Connect - Social Co-Working Space,100
+2,1,LYF Funan Singapore,2,Open Connect - Social & Sip,50
+3,1,LYF Funan Singapore,3,Bond - Social Kitchen,200
+4,1,LYF Funan Singapore,4,Burn - Social Gym,150
+5,1,LYF Funan Singapore,5,Wash & Hang - Laundromat,100
+6,1,LYF Funan Singapore,6,Meet - Social Meeting Space,150
+7,1,LYF Funan Singapore,7,Colab - Social Co-Working Space,100
+8,2,LYF Farrer Park Singapore,1,Connect - Social Co-Working Space,100
+9,2,LYF Farrer Park Singapore,2,Open Connect - Social & Sip,50
+10,2,LYF Farrer Park Singapore,3,Bond - Social Kitchen,200
+11,2,LYF Farrer Park Singapore,4,Burn - Social Gym,150
+12,2,LYF Farrer Park Singapore,5,Wash & Hang - Laundromat,100
+13,2,LYF Farrer Park Singapore,6,Meet - Social Meeting Space,150
+14,2,LYF Farrer Park Singapore,7,Colab - Social Co-Working Space,100
+
