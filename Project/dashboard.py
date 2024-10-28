@@ -141,19 +141,24 @@ def generate_fake_real_time_data(hotel_name, amenity, day_of_week):
 # Create fake real-time data (to be replaced with actual data from Arduino)
 def generate_fake_real_time_todays_data(hotel_name, amenity, day_of_week):
     real_time_data = []
-    real_time_data.append({'hour': 0, 'usage_count': 0})
     current_hour = datetime.datetime.now().hour
     # current_hour = 10
     current_dow = datetime.datetime.now().strftime('%A')
     # print(current_hour, current_dow)
     if current_dow != day_of_week:
+        real_time_data.append({'hour': 0, 'usage_count': 0})
         return pd.DataFrame(real_time_data)
     for hour in range(0, current_hour + 1):
         usage_pct = randomize_usage(hour_usage_pct[hour], min_max_pct=0.7)
         size_of_amenity = get_amenity_size(hotel_name, amenity)
         avg_resident_count = avg_reservation_cnt_dict[(hotel_name, day_of_week)]
         usage_cnt = int((avg_resident_count * usage_pct) * (size_of_amenity / 100))
-        real_time_data.append({'hour': hour, 'usage_count': usage_cnt})
+        # if usage_cnt > 0:
+        if hour == current_hour:
+            usage_cnt = usage_cnt * random.uniform(0.7, 1.5)
+        to_append = {'hour': hour, 'usage_count': usage_cnt}
+        # print(to_append)
+        real_time_data.append(to_append)
     real_time_df = pd.DataFrame(real_time_data)
     return real_time_df
 
@@ -173,7 +178,18 @@ if selection == "For Customers":
     # Customer Filters
     st.sidebar.header("Customer Filters")
     selected_hotel = st.sidebar.selectbox("Select Hotel", options=list(hotel_amenities.keys()))
-    selected_amenity = st.sidebar.selectbox("Select Amenity", options=hotel_amenities[selected_hotel])
+    amenity_list = hotel_amenities[selected_hotel]
+    amenity_order = {
+        'Bond - Social Kitchen': 1,
+        'Wash & Hang - Laundromat': 2,
+        'Connect - Social Co-Working Space': 3,
+        'Open Connect - Social & Sip': 4,
+        'Burn - Social Gym': 5,
+        'Meet - Social Meeting Space': 6,
+        'Colab - Social Co-Working Space': 7
+    }
+    amenity_list.sort(key=lambda x: amenity_order[x])
+    selected_amenity = st.sidebar.selectbox("Select Amenity", options=amenity_list)
     selected_day = st.radio("Select Day of Week", options=day_of_week_list, index=day_of_week_list.index(todays_dow), horizontal=True)
 
     # Filter historical data
@@ -184,45 +200,55 @@ if selection == "For Customers":
         ]
 
     # Generate fake real-time data
-    real_time_data = generate_fake_real_time_todays_data(selected_hotel, selected_amenity, selected_day)
+    @st.fragment(run_every=5)
+    def refresh_live_data():
+        real_time_data = generate_fake_real_time_todays_data(selected_hotel, selected_amenity, selected_day)
+        # Merge historical and real-time data
+        comparison_df = pd.merge(historical_data, real_time_data, on='hour', suffixes=('_historical', '_real_time'), how='outer')
+        # print(comparison_df)
 
-    # Merge historical and real-time data
-    comparison_df = pd.merge(historical_data, real_time_data, on='hour', suffixes=('_historical', '_real_time'), how='outer')
+        # Plotting
+        st.subheader(f"Amenity Usage for {selected_amenity} on {selected_day}s at {selected_hotel}")
 
-    # Plotting
-    st.subheader(f"Amenity Usage for {selected_amenity} on {selected_day}s at {selected_hotel}")
+        comparison_long = comparison_df.melt(id_vars=['hour'], value_vars=['usage_count_historical', 'usage_count_real_time'],
+                                             var_name='Type', value_name='UsageCount')
+        # print(comparison_long)
 
-    comparison_long = comparison_df.melt(id_vars=['hour'], value_vars=['usage_count_historical', 'usage_count_real_time'],
-                                         var_name='Type', value_name='UsageCount')
+        historical_bars = alt.Chart(comparison_long[comparison_long['Type'] == 'usage_count_historical']).mark_bar(
+            opacity=0.8,
+            color='#4B89DC',  # Softer blue
+            size=25
+        ).encode(
+            x=alt.X('hour:Q', title='Hour of Day', scale=alt.Scale(domain=[0, 24])),
+            y=alt.Y('UsageCount:Q', title='Usage Count'),
+            tooltip=['hour:Q', 'UsageCount:Q']
+        )
 
+        print(comparison_long[comparison_long['Type'] == 'usage_count_real_time'])
+        live_bars = alt.Chart(comparison_long[comparison_long['Type'] == 'usage_count_real_time']).mark_bar(
+            opacity=0.6,
+            color='#E74C3C',  # Softer red
+            size=28,
+            tooltip=True  # Always show tooltip
+        ).encode(
+            x=alt.X('hour:Q', scale=alt.Scale(domain=[0, 24])),  # Fixed x-axis range
+            y=alt.Y('UsageCount:Q', title='Number of People'),
+            tooltip=['hour:Q', 'UsageCount:Q']
+        )
+        combined_chart = (historical_bars + live_bars).properties(
+            width=800,
+            height=400,
+            title=f"Amenity Usage for {selected_amenity} on {selected_day}s at {selected_hotel}"
+        ).configure_axis(
+            grid=False,
+            gridColor='#EEEEEE'  # Light gray grid
+        ).configure_view(
+            strokeWidth=0  # Remove border
+        )
 
-    # Create Combined Bar and Line Chart
-    bar = alt.Chart(comparison_long[comparison_long['Type'] == 'usage_count_historical']).mark_bar(
-        color='steelblue',
-        opacity=0.7
-    ).encode(
-        x=alt.X('hour:Q', title='Hour of Day', scale=alt.Scale(domain=[0, 23])),
-        y=alt.Y('UsageCount:Q', title='Usage Count'),
-        tooltip=['hour:Q', 'UsageCount:Q']
-    )
+        st.altair_chart(combined_chart, use_container_width=True)
 
-    line = alt.Chart(comparison_long[comparison_long['Type'] == 'usage_count_real_time']).mark_line(
-        color='orange',
-        strokeWidth=2
-    ).encode(
-        x=alt.X('hour:Q', scale=alt.Scale(domain=[0, 23])),
-        y=alt.Y('UsageCount:Q'),
-        tooltip=['hour:Q', 'UsageCount:Q']
-    )
-
-    combined_chart = alt.layer(bar, line).resolve_scale(
-        y='shared'
-    ).properties(
-        title=f"Amenity Usage for {selected_amenity} on {selected_day}s at {selected_hotel}"
-    ).interactive()
-
-    st.altair_chart(combined_chart, use_container_width=True)
-
+    refresh_live_data()
     st.markdown("""
     **Note:** The real-time data is currently simulated and will be replaced with actual data collected from sensors.
     """)
@@ -256,7 +282,7 @@ elif selection == "For Hotel Management":
         (hotel_usage_data['amenity'] == selected_amenity) &
         (hotel_usage_data['hotel_name'].isin([control_hotel, treatment_hotel]))
         ]
-    management_data['usage_hours_per_resident'] = management_data['usage_count'] / management_data['resident_count']
+    management_data.loc[:, 'usage_hours_per_resident'] = management_data['usage_count'] / management_data['resident_count']
 
     # Select Metric
     if selected_metric == 'Usage Count':
