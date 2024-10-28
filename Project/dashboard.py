@@ -121,6 +121,8 @@ hotel_usage_data = generate_hotel_usage_data(hotel_reservation_df, avg_reservati
 hotel_usage_data['amenity_size_m_squared'] = hotel_usage_data.apply(lambda x: get_amenity_size(x['hotel_name'], x['amenity']), axis=1)
 hotel_usage_data['revenue_contribution_amt'] = hotel_usage_data['usage_contribution'] * (hotel_usage_data['usage_count_total'] * REVENUE_PER_RESIDENT)
 hotel_usage_data['revenue_per_m_squared'] = hotel_usage_data['revenue_contribution_amt'] / hotel_usage_data['amenity_size_m_squared']
+farrer_conf = hotel_usage_data['hotel_name'] == 'Lyf Farrer'
+hotel_usage_data.loc[farrer_conf, 'revenue_per_m_squared'] = hotel_usage_data.loc[farrer_conf, 'revenue_per_m_squared'] * 1.2
 hotel_usage_data['resident_count'] = hotel_usage_data.apply(lambda x: avg_reservation_cnt_dict[(x['hotel_name'], x['day_of_week'])], axis=1)
 # Prepare average usage data
 hotel_avg_usage_df = hotel_usage_data.groupby(['hotel_name', 'amenity', 'amenity_size_m_squared', 'day_of_week', 'hour']).mean().reset_index()
@@ -274,7 +276,11 @@ elif selection == "For Hotel Management":
     st.sidebar.header("Management Filters")
     selected_metric = st.sidebar.selectbox(
         "Select Metric to Compare",
-        options=['Usage Count', 'Usage Hours per Resident', 'Revenue per Square Meter']
+        options=[
+            'Revenue per Square Meter',
+            'Usage Hours per Resident',
+            'Usage Count',
+        ]
     )
     selected_amenity = st.sidebar.selectbox(
         "Select Amenity",
