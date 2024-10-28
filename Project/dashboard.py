@@ -222,7 +222,7 @@ if selection == "For Customers":
 
     real_time_data_hist = generate_fake_real_time_todays_data(selected_hotel, selected_amenity, selected_day)
     # Generate fake real-time data
-    @st.fragment(run_every=10)
+    @st.fragment(run_every=5)
     def refresh_live_data():
         real_time_data_new = generate_fake_real_time_data(selected_hotel, selected_amenity, selected_day)
         if len(real_time_data_hist) > 0:
