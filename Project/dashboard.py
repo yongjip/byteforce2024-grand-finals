@@ -148,7 +148,7 @@ def generate_fake_real_time_todays_data(hotel_name, amenity, day_of_week):
     # print(current_hour, current_dow)
     if current_dow != day_of_week:
         return pd.DataFrame(real_time_data)
-    for hour in range(0, current_hour):
+    for hour in range(0, current_hour + 1):
         usage_pct = randomize_usage(hour_usage_pct[hour], min_max_pct=0.7)
         size_of_amenity = get_amenity_size(hotel_name, amenity)
         avg_resident_count = avg_reservation_cnt_dict[(hotel_name, day_of_week)]
