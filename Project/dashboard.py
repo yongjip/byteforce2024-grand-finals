@@ -125,18 +125,18 @@ hotel_usage_data['resident_count'] = hotel_usage_data.apply(lambda x: avg_reserv
 # Prepare average usage data
 hotel_avg_usage_df = hotel_usage_data.groupby(['hotel_name', 'amenity', 'amenity_size_m_squared', 'day_of_week', 'hour']).mean().reset_index()
 hotel_avg_usage_df.drop(['usage_count_total'], axis=1, inplace=True)
-
-# Create fake real-time data (to be replaced with actual data from Arduino)
-def generate_fake_real_time_data(hotel_name, amenity, day_of_week):
-    real_time_data = []
-    for hour in range(24):
-        usage_pct = randomize_usage(hour_usage_pct[hour])
-        size_of_amenity = get_amenity_size(hotel_name, amenity)
-        avg_resident_count = avg_reservation_cnt_dict[(hotel_name, day_of_week)]
-        usage_cnt = int((avg_resident_count * usage_pct) * (size_of_amenity / 100))
-        real_time_data.append({'hour': hour, 'usage_count': usage_cnt})
-    real_time_df = pd.DataFrame(real_time_data)
-    return real_time_df
+#
+# # Create fake real-time data (to be replaced with actual data from Arduino)
+# def generate_fake_real_time_data(hotel_name, amenity, day_of_week):
+#     real_time_data = []
+#     for hour in range(24):
+#         usage_pct = randomize_usage(hour_usage_pct[hour])
+#         size_of_amenity = get_amenity_size(hotel_name, amenity)
+#         avg_resident_count = avg_reservation_cnt_dict[(hotel_name, day_of_week)]
+#         usage_cnt = int((avg_resident_count * usage_pct) * (size_of_amenity / 100))
+#         real_time_data.append({'hour': hour, 'usage_count': usage_cnt})
+#     real_time_df = pd.DataFrame(real_time_data)
+#     return real_time_df
 
 # Create fake real-time data (to be replaced with actual data from Arduino)
 def generate_fake_real_time_todays_data(hotel_name, amenity, day_of_week):
@@ -159,8 +159,31 @@ def generate_fake_real_time_todays_data(hotel_name, amenity, day_of_week):
         to_append = {'hour': hour, 'usage_count': usage_cnt}
         # print(to_append)
         real_time_data.append(to_append)
-    real_time_df = pd.DataFrame(real_time_data)
-    return real_time_df
+    return real_time_data
+
+# Create fake real-time data (to be replaced with actual data from Arduino)
+def generate_fake_real_time_data(hotel_name, amenity, day_of_week):
+    real_time_data = []
+    current_hour = datetime.datetime.now().hour
+    # current_hour = 10
+    current_dow = datetime.datetime.now().strftime('%A')
+    # print(current_hour, current_dow)
+    if current_dow != day_of_week:
+        real_time_data.append({'hour': 0, 'usage_count': 0})
+        return pd.DataFrame(real_time_data)
+    for hour in range(0, current_hour + 1):
+        usage_pct = randomize_usage(hour_usage_pct[hour], min_max_pct=0.7)
+        size_of_amenity = get_amenity_size(hotel_name, amenity)
+        avg_resident_count = avg_reservation_cnt_dict[(hotel_name, day_of_week)]
+        usage_cnt = int((avg_resident_count * usage_pct) * (size_of_amenity / 100))
+        # if usage_cnt > 0:
+        if hour == current_hour:
+            usage_cnt = usage_cnt * random.uniform(0.7, 1.5)
+        to_append = {'hour': hour, 'usage_count': usage_cnt}
+        # print(to_append)
+        real_time_data.append(to_append)
+    return real_time_data
+
 
 # Streamlit App
 st.title("Lyf Space: Enhancing Communal Spaces through Data-Driven Insights")
@@ -199,10 +222,13 @@ if selection == "For Customers":
         (hotel_avg_usage_df['day_of_week'] == selected_day)
         ]
 
+    real_time_data_hist = generate_fake_real_time_todays_data(selected_hotel, selected_amenity, selected_day)
     # Generate fake real-time data
     @st.fragment(run_every=5)
     def refresh_live_data():
-        real_time_data = generate_fake_real_time_todays_data(selected_hotel, selected_amenity, selected_day)
+        real_time_data_new = generate_fake_real_time_data(selected_hotel, selected_amenity, selected_day)
+        real_time_data_hist[-1] = real_time_data_new[-1]
+        real_time_data = pd.DataFrame(real_time_data_hist)
         # Merge historical and real-time data
         comparison_df = pd.merge(historical_data, real_time_data, on='hour', suffixes=('_historical', '_real_time'), how='outer')
         # print(comparison_df)
