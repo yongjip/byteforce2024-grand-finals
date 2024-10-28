@@ -147,7 +147,8 @@ def generate_fake_real_time_todays_data(hotel_name, amenity, day_of_week):
         # if usage_cnt > 0:
         if hour == current_hour:
             usage_cnt = usage_cnt * random.uniform(0.7, 1.5)
-        to_append = {'hour': hour, 'usage_count': usage_cnt}
+        # to_append = {'hour': hour, 'usage_count': usage_cnt}
+        to_append = {'hour': hour, 'usage_count': 0}
         # print(to_append)
         real_time_data.append(to_append)
     return real_time_data
