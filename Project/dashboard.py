@@ -402,7 +402,7 @@ elif selection == "Anomaly Detection - Case of Burner Breakdown":
 
     # Vertical lines for each date in vertical_line_dates
     vertical_lines = alt.Chart(vertical_line_dates).mark_rule(
-        color="white",
+        color="red",
         strokeDash=[5, 5]
     ).encode(
         x="Date:T"
